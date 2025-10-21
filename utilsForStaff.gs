@@ -1,8 +1,8 @@
-/** 4/25 寄信(A-1): staff 下對上 直屬兩層表單 */
+/** 10/28 寄信(A-1): staff 下對上 直屬兩層表單 */
 function sendMemberListToStaff() {
   const ss = SpreadsheetApp.openById(googleSheetId);
-  const staffSheet = ss.getSheetByName("staff(下對上-prod)");
-  const dataRange = staffSheet.getRange(266, 1, 1, staffSheet.getLastColumn()); // (第2row,第Acolumn,row數)
+  const staffSheet = ss.getSheetByName("staff(下對上-test)");
+  const dataRange = staffSheet.getRange(2, 1, 1, staffSheet.getLastColumn()); // (第2row,第Acolumn,row數) // 針對要發送的數量分批發送使用，例如: 第2列開始，發送20筆資料則修改為(2, 1, 20, staffSheet.getLastColumn())
   const data = dataRange.getValues();
 
   for (let i = 0; i < data.length; i++) {
@@ -97,14 +97,16 @@ function sendMemberListToStaff() {
       firstManager_NT,
       secondManager_NT,
     );
+
+    // 如果要先產生每一筆同仁的URL供確認，以下這段寄信func.可先註解
     try {
-      const result = sendEmailViaApi(
+      const result = sendEmail(
         staffEmail,
         "敬邀參與意見調查，以提升工作環境與管理效能(非主管職-下對上)",
         emailContent,
       );
       // 5. 確認郵件是否成功發送
-      if (result && result.MessageId) {
+      if (result && result.success) {
         data[i][19] = "staff_sent"; //更新同仁狀態
         Logger.log(
           `成功寄信給 ${employeeId}:${userNT_id}。狀態變更為:${data[i][19]}。
@@ -117,6 +119,11 @@ function sendMemberListToStaff() {
       } else {
         Logger.log(`無法成功寄信 ${employeeId}:${userNT_id}:${staffEmail}`);
         data[i][19] = staffStatus; // 捕捉到錯誤時，不更新狀態
+      }
+      // ✅ 加入發送延遲，避免觸發 AWS SES 速率限制
+      // 每封郵件間隔 100ms，相當於每秒最多發送 10 封
+      if (i < data.length - 1) {
+        Utilities.sleep(100);
       }
     } catch (error) {
       Logger.log(

@@ -1,7 +1,7 @@
-/** 4/25 寄信(B-1): manager 下對上 課評部 */
-// function sendMemberListToManager_downToUp() {
+/** 10/28 寄信(B-1): manager 下對上 課評部 */
+function sendMemberListToManager_downToUp() {
 //   const ss = SpreadsheetApp.openById(googleSheetId);
-//   const staffSheet = ss.getSheetByName('manager(all-prod)');
+//   const staffSheet = ss.getSheetByName('manager(all-test)');
 //   const dataRange = staffSheet.getRange(2, 1, 103, staffSheet.getLastColumn()); // (第2row,第Acolumn,row數)
 //   const data = dataRange.getValues();
 
@@ -72,9 +72,9 @@
 //     // 4. 引用信件樣板&寄信
 //     let emailContent = emailTemplate_staff(userNT_id,firstManagerFormUrl,'',firstManager_NT,'')
 //     try {
-//       const result = sendEmailViaApi(staffEmail, '敬邀參與意見調查，以提升工作環境與管理效能(下對上-課評部)', emailContent);
+//       const result = sendEmail(staffEmail, '敬邀參與意見調查，以提升工作環境與管理效能(下對上-課評部)', emailContent);
 //       // 5. 確認郵件是否成功發送
-//       if (result && result.MessageId) {
+//       if (result && result.success) {
 //         data[i][19] = "staff_sent"; //更新同仁狀態
 //         Logger.log(`
 // 成功寄信給 ${employeeId}:${userNT_id}。狀態變更為:${data[i][19]}。
@@ -84,6 +84,11 @@
 //       } else {
 //         Logger.log(`無法成功寄信 ${employeeId}:${userNT_id}:${staffEmail}`);
 //         data[i][19] = staffStatus; // 捕捉到錯誤時，不更新狀態
+//       }
+//       // ✅ 加入發送延遲，避免觸發 AWS SES 速率限制
+//       // 每封郵件間隔 100ms，相當於每秒最多發送 10 封
+//       if (i < data.length - 1) {
+//         Utilities.sleep(100);
 //       }
 //     } catch (error) {
 //       Logger.log(`發送失敗：${employeeId}:${userNT_id} Error: ${error.message}`);
@@ -95,11 +100,11 @@
 // }
 
 /**--------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- */
-/** 4/25 寄信(B-3): manager 課、部主管 > 自評 & 助理表單*/
-// function sendManagerList_SelfandPA() {
+/** 10/28 寄信(B-3): manager 課、部主管 > 自評 & 助理表單*/
+function sendManagerList_SelfandPA() {
 //   const ss = SpreadsheetApp.openById(googleSheetId);
-//   const staffSheet = ss.getSheetByName('manager(all-prod)'); //??這邊要替換成正確的工作表名稱??
-//   const dataRange = staffSheet.getRange(2, 1, 103, staffSheet.getLastColumn()); // (第2row,第Acolumn,row數)
+//   const staffSheet = ss.getSheetByName('manager(all-test)'); //這邊要替換成prod的工作表名稱
+//   const dataRange = staffSheet.getRange(2, 1, 5, staffSheet.getLastColumn()); // (第2row,第Acolumn,row數)
 //   const data = dataRange.getValues();
 
 //   for (let i = 0; i < data.length; i++) { // 跳過表頭，從第二行開始
@@ -147,11 +152,11 @@
 //     let selfManagerFormUrl = "";
 //     let paManagerFormUrl  = "";
 
-//     //自評表單(一定會有)
-//     selfManagerFormUrl = `${formBaseUrlC}&${formUrlC_reviewer}=${satffDivision}%2F${satffDep}%2F${userNT_id}&${formUrlC_reviewee}=${userNT_id}`;
+//     //自評表單(沒有要做自評的話註解掉)
+//     // selfManagerFormUrl = `${formBaseUrlC}&${formUrlC_reviewer}=${satffDivision}%2F${satffDep}%2F${userNT_id}&${formUrlC_reviewee}=${userNT_id}`;
 //     data[i][25] = selfManagerFormUrl || "";
 
-//     //助理表單(? 資訊長室/台固同仁 助理名單 ?)
+//     //助理表單(資訊長室/台固同仁 助理名單)
 //     if (pa_NT) {
 //       paManagerFormUrl = `${formBaseUrlD}&${formUrlD_reviewer}=${satffDivision}%2F${satffDep}%2F${userNT_id}&${formUrlD_reviewee}=${staffDep}:${pa_NT}`;
 //       data[i][26] = paManagerFormUrl || "";
@@ -166,9 +171,9 @@
 //     // 4. 引用信件樣板&寄信
 //     let emailContent = emailTemplate_manager_self(userNT_id, selfManagerFormUrl, paManagerFormUrl, pa_NT, staffDep);
 //     try {
-//       const result = sendEmailViaApi(staffEmail, '敬邀參與意見調查，以提升工作環境與管理效能(自評&助理滿意度)', emailContent);
+//       const result = sendEmail(staffEmail, '敬邀參與意見調查，以提升工作環境與管理效能(助理滿意度)', emailContent);
 //       // 5. 確認郵件是否成功發送
-//       if (result && result.MessageId) {
+//       if (result && result.success) {
 //         data[i][24] = "self_sent"; //更新寄送後狀態(Y欄)
 //         Logger.log(`
 // 成功寄信給 ${employeeId}:${userNT_id}。層級${staffLevel}/職級${staffGrade}。狀態變更為:${data[i][24]}。
@@ -179,6 +184,11 @@
 //       } else {
 //         Logger.log(`無法成功寄信 ${employeeId}:${userNT_id}:${staffEmail}`);
 //         data[i][24] = self_status; // 捕捉到錯誤時，不更新狀態
+//       }
+//       // ✅ 加入發送延遲，避免觸發 AWS SES 速率限制
+//       // 每封郵件間隔 100ms，相當於每秒最多發送 10 封
+//       if (i < data.length - 1) {
+//         Utilities.sleep(100);
 //       }
 //     } catch (error) {
 //       Logger.log(`發送失敗：${employeeId}:${userNT_id} Error: ${error.message}`);
@@ -191,10 +201,10 @@
 // }
 
 /**--------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- */
-/** 5/7 寄信(B-2): manager 上對下 部評課*/
+/**XXXXXXXXXXXXXXXXXXX 不需要! 寄信(B-2): manager 上對下 部評課XXXXXXXXXXXXXXXXXXXXXXX*/
 // function sendMemberListToManager_upToDown() {
 //   const ss = SpreadsheetApp.openById(googleSheetId);
-//   const staffSheet = ss.getSheetByName('manager(all-prod)');
+//   const staffSheet = ss.getSheetByName('manager(all-test)');
 //   const dataRange = staffSheet.getRange(2, 1, 103, staffSheet.getLastColumn()); // (第2row,第Acolumn,row數)
 //   const data = dataRange.getValues();
 
@@ -289,8 +299,8 @@
 //     // 信件內容
 //     const emailContent = emailTemplate_manager_multi(manager_NT, urls, staff_NTs); // 多表單模板
 //     try {
-//       const result = sendEmailViaApi(managerEmail, `敬邀參與意見調查，以提升工作環境與管理效能(上對下-部評課)`, emailContent);
-//       if (result && result.MessageId) {
+//       const result = sendEmail(managerEmail, `敬邀參與意見調查，以提升工作環境與管理效能(上對下-部評課)`, emailContent);
+//       if (result && result.success) {
 //         for (const rowIndex of rowIndexes) {
 //           data[rowIndex][22] = "manager_sent"; //上對下的發送狀態(W欄)
 //         }
@@ -301,6 +311,11 @@
 //           data[rowIndex][22] = "sent_error";
 //         }
 //         Logger.log(`無法成功寄信給 ${employeeId}:${userNT_id} 的主管: ${manager_NT}。主管狀態為:${managerStatus}。`);
+//       }
+//       // ✅ 加入發送延遲，避免觸發 AWS SES 速率限制
+//       // 每封郵件間隔 100ms，相當於每秒最多發送 10 封
+//       if (i < data.length - 1) {
+//         Utilities.sleep(100);
 //       }
 //     } catch (error) {
 //       Logger.log(`發送失敗：${manager_NT} Error: ${error.message}`);
