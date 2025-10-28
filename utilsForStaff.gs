@@ -1,7 +1,7 @@
 /** 10/28 寄信(A-1): staff 下對上 直屬兩層表單 */
 function sendMemberListToStaff() {
   const ss = SpreadsheetApp.openById(googleSheetId);
-  const staffSheet = ss.getSheetByName("staff(下對上-test)");
+  const staffSheet = ss.getSheetByName("staff(下對上-check)");
   const dataRange = staffSheet.getRange(2, 1, 1, staffSheet.getLastColumn()); // (第2row,第Acolumn,row數) // 針對要發送的數量分批發送使用，例如: 第2列開始，發送20筆資料則修改為(2, 1, 20, staffSheet.getLastColumn())
   const data = dataRange.getValues();
 
@@ -88,7 +88,8 @@ function sendMemberListToStaff() {
       );
       continue;
     }
-
+    
+    // 如果要先產生每一筆同仁的URL供確認，以下這段寄信func.可先註解
     // 4. 引用信件樣板&執行寄信
     let emailContent = emailTemplate_staff(
       userNT_id,
@@ -98,7 +99,6 @@ function sendMemberListToStaff() {
       secondManager_NT,
     );
 
-    // 如果要先產生每一筆同仁的URL供確認，以下這段寄信func.可先註解
     try {
       const result = sendEmail(
         staffEmail,

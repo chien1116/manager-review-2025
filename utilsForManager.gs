@@ -1,8 +1,8 @@
 /** 10/28 寄信(B-1): manager 下對上 課評部 */
-function sendMemberListToManager_downToUp() {
+// function sendMemberListToManager_downToUp() {
 //   const ss = SpreadsheetApp.openById(googleSheetId);
-//   const staffSheet = ss.getSheetByName('manager(all-test)');
-//   const dataRange = staffSheet.getRange(2, 1, 103, staffSheet.getLastColumn()); // (第2row,第Acolumn,row數)
+//   const staffSheet = ss.getSheetByName('manager(all-check)');
+//   const dataRange = staffSheet.getRange(2, 1, 1, staffSheet.getLastColumn()); // (第2row,第Acolumn,row數)
 //   const data = dataRange.getValues();
 
 //   for (let i = 0; i < data.length; i++) { // 跳過表頭，從第二行開始
@@ -69,8 +69,9 @@ function sendMemberListToManager_downToUp() {
 //       continue;
 //     }
 
+//     // 如果要先產生每一筆同仁的URL供確認，以下這段寄信func.可先註解
 //     // 4. 引用信件樣板&寄信
-//     let emailContent = emailTemplate_staff(userNT_id,firstManagerFormUrl,'',firstManager_NT,'')
+//    let emailContent = emailTemplate_staff(userNT_id,firstManagerFormUrl,'',firstManager_NT,'')
 //     try {
 //       const result = sendEmail(staffEmail, '敬邀參與意見調查，以提升工作環境與管理效能(下對上-課評部)', emailContent);
 //       // 5. 確認郵件是否成功發送
@@ -102,103 +103,135 @@ function sendMemberListToManager_downToUp() {
 /**--------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- */
 /** 10/28 寄信(B-3): manager 課、部主管 > 自評 & 助理表單*/
 function sendManagerList_SelfandPA() {
-//   const ss = SpreadsheetApp.openById(googleSheetId);
-//   const staffSheet = ss.getSheetByName('manager(all-test)'); //這邊要替換成prod的工作表名稱
-//   const dataRange = staffSheet.getRange(2, 1, 5, staffSheet.getLastColumn()); // (第2row,第Acolumn,row數)
-//   const data = dataRange.getValues();
+  const ss = SpreadsheetApp.openById(googleSheetId);
+  const staffSheet = ss.getSheetByName("manager(all-check)"); //這邊要替換成prod的工作表名稱
+  const dataRange = staffSheet.getRange(2, 1, 1, staffSheet.getLastColumn()); // (第2row,第Acolumn,row數)
+  const data = dataRange.getValues();
 
-//   for (let i = 0; i < data.length; i++) { // 跳過表頭，從第二行開始
-//     const employeeId = data[i][0]; // 員工ID 在第1欄
-//     const userNT_id = data[i][1]; //NT_id 在第2欄
-//     const staffEmail = data[i][2]; //同仁email在第3欄 (C欄)
-//     const staffGrade = data[i][6]; //同仁職級(G欄)
-//     const staffLevel = data[i][8]; // 同仁身分 (I欄)
-//     const staffDep = data[i][3]; // 處別(D欄)
-//     const satffDivision = data[i][3]; // 處別在第4列 (D欄)
-//     const satffDep = data[i][4]; // 部別在第5列 (E欄)
+  for (let i = 0; i < data.length; i++) {
+    // 跳過表頭，從第二行開始
+    const employeeId = data[i][0]; // 員工ID 在第1欄
+    const userNT_id = data[i][1]; //NT_id 在第2欄
+    const staffEmail = data[i][2]; //同仁email在第3欄 (C欄)
+    const staffGrade = data[i][6]; //同仁職級(G欄)
+    const staffLevel = data[i][8]; // 同仁身分 (I欄)
+    const staffDep = data[i][3]; // 處別(D欄)
+    const satffDivision = data[i][3]; // 處別在第4列 (D欄)
+    const satffDep = data[i][4]; // 部別在第5列 (E欄)
 
-//     const pa_NT = data[i][18]; // 助理NT (S欄)
-//     const self_status = data[i][24]; // 狀態在第25列 (Y欄)
+    const pa_NT = data[i][18]; // 助理NT (S欄)
+    const self_status = data[i][24]; // 狀態在第25列 (Y欄)
 
-//     // 1. 過濾條件
-//     // 狀態已寄送過，不重寄(只有空白狀態要寄信)
-//     if (self_status !== "" && self_status !== undefined) {
-//       Logger.log(`SKIP: ${employeeId}:${userNT_id} 狀態非待寄信狀態 ${self_status}。`);
-//       continue;
-//     }
+    // 1. 過濾條件
+    // 狀態已寄送過，不重寄(只有空白狀態要寄信)
+    if (self_status !== "" && self_status !== undefined) {
+      Logger.log(
+        `SKIP: ${employeeId}:${userNT_id} 狀態非待寄信狀態 ${self_status}。`,
+      );
+      continue;
+    }
 
-//     // G欄: 員工G61以上、如果是NAN 或 不存在 => 不發送
-//     const parsedGrade = parseInt(staffGrade);
-//     if (!staffGrade || isNaN(parsedGrade)) {
-//       Logger.log(`SKIP: ${employeeId}:${userNT_id} 職級無效 (${staffGrade})，不寄信。`);
-//       continue;
-//     }else if (parsedGrade >= 61) {
-//       Logger.log(`SKIP: ${employeeId}:${userNT_id} 同仁職級: G${staffGrade} 不寄信。`);
-//       continue;
-//     }
+    // G欄: 員工G61以上、如果是NAN 或 不存在 => 不發送
+    const parsedGrade = parseInt(staffGrade);
+    if (!staffGrade || isNaN(parsedGrade)) {
+      Logger.log(
+        `SKIP: ${employeeId}:${userNT_id} 職級無效 (${staffGrade})，不寄信。`,
+      );
+      continue;
+    } else if (parsedGrade >= 61) {
+      Logger.log(
+        `SKIP: ${employeeId}:${userNT_id} 同仁職級: G${staffGrade} 不寄信。`,
+      );
+      continue;
+    }
 
-//     // 只處理manager/manager-1/manager-2/manager-3
-//     if (staffLevel !== "manager" && staffLevel !== "manager-1" && staffLevel !== "manager-2" && staffLevel !== "manager-3") {
-//       Logger.log(`SKIP: ${employeeId}:${userNT_id}。層級為 ${staffLevel}，不符合自評條件。`);
-//       continue;
-//     }
+    // 只處理manager/manager-1/manager-2/manager-3
+    if (
+      staffLevel !== "manager" &&
+      staffLevel !== "manager-1" &&
+      staffLevel !== "manager-2" &&
+      staffLevel !== "manager-3"
+    ) {
+      Logger.log(
+        `SKIP: ${employeeId}:${userNT_id}。層級為 ${staffLevel}，不符合自評條件。`,
+      );
+      continue;
+    }
 
-//     if (!staffEmail) {
-//       Logger.log(`SKIP: ${employeeId}:${userNT_id}: 無法成功寄信，請確認同仁信箱是否存在。`);
-//       continue;
-//     }
+    if (!staffEmail) {
+      Logger.log(
+        `SKIP: ${employeeId}:${userNT_id}: 無法成功寄信，請確認同仁信箱是否存在。`,
+      );
+      continue;
+    }
 
-//     // 2. 表單連結(自評&助理)
-//     let selfManagerFormUrl = "";
-//     let paManagerFormUrl  = "";
+    // 2. 表單連結(自評&助理)
+    let selfManagerFormUrl = "";
+    let paManagerFormUrl = "";
 
-//     //自評表單(沒有要做自評的話註解掉)
-//     // selfManagerFormUrl = `${formBaseUrlC}&${formUrlC_reviewer}=${satffDivision}%2F${satffDep}%2F${userNT_id}&${formUrlC_reviewee}=${userNT_id}`;
-//     data[i][25] = selfManagerFormUrl || "";
+    //自評表單(沒有要做自評的話註解掉)
+    // selfManagerFormUrl = `${formBaseUrlC}&${formUrlC_reviewer}=${satffDivision}%2F${satffDep}%2F${userNT_id}&${formUrlC_reviewee}=${userNT_id}`;
+    data[i][25] = selfManagerFormUrl || "";
 
-//     //助理表單(資訊長室/台固同仁 助理名單)
-//     if (pa_NT) {
-//       paManagerFormUrl = `${formBaseUrlD}&${formUrlD_reviewer}=${satffDivision}%2F${satffDep}%2F${userNT_id}&${formUrlD_reviewee}=${staffDep}:${pa_NT}`;
-//       data[i][26] = paManagerFormUrl || "";
-//     }
+    //助理表單(資訊長室/台固同仁 助理名單)
+    if (pa_NT) {
+      paManagerFormUrl = `${formBaseUrlD}&${formUrlD_reviewer}=${satffDivision}%2F${satffDep}%2F${userNT_id}&${formUrlD_reviewee}=${staffDep}:${pa_NT}`;
+      data[i][26] = paManagerFormUrl || "";
+    }
 
-//     // 3. 若都沒有表單，略過寄信
-//     if (!selfManagerFormUrl && !paManagerFormUrl) {
-//       Logger.log(`SKIP: ${employeeId}:${userNT_id}:主管無自評或助理表單可寄送。`);
-//       continue;
-//     }
+    // 3. 若都沒有表單，略過寄信
+    if (!selfManagerFormUrl && !paManagerFormUrl) {
+      Logger.log(
+        `SKIP: ${employeeId}:${userNT_id}:主管無自評或助理表單可寄送。`,
+      );
+      continue;
+    }
 
-//     // 4. 引用信件樣板&寄信
-//     let emailContent = emailTemplate_manager_self(userNT_id, selfManagerFormUrl, paManagerFormUrl, pa_NT, staffDep);
-//     try {
-//       const result = sendEmail(staffEmail, '敬邀參與意見調查，以提升工作環境與管理效能(助理滿意度)', emailContent);
-//       // 5. 確認郵件是否成功發送
-//       if (result && result.success) {
-//         data[i][24] = "self_sent"; //更新寄送後狀態(Y欄)
-//         Logger.log(`
-// 成功寄信給 ${employeeId}:${userNT_id}。層級${staffLevel}/職級${staffGrade}。狀態變更為:${data[i][24]}。
-// 自評表單：${selfManagerFormUrl || "無"}。
-// 處別: ${staffDep} / 處助理: ${pa_NT}。
-// 助理名單：${paManagerFormUrl || "無"}。
-//         `);
-//       } else {
-//         Logger.log(`無法成功寄信 ${employeeId}:${userNT_id}:${staffEmail}`);
-//         data[i][24] = self_status; // 捕捉到錯誤時，不更新狀態
-//       }
-//       // ✅ 加入發送延遲，避免觸發 AWS SES 速率限制
-//       // 每封郵件間隔 100ms，相當於每秒最多發送 10 封
-//       if (i < data.length - 1) {
-//         Utilities.sleep(100);
-//       }
-//     } catch (error) {
-//       Logger.log(`發送失敗：${employeeId}:${userNT_id} Error: ${error.message}`);
-//     }
+    // 如果要先產生每一筆同仁的URL供確認，以下這段寄信func.可先註解
+    // 4. 引用信件樣板&寄信
+    let emailContent = emailTemplate_manager_self(
+      userNT_id,
+      selfManagerFormUrl,
+      paManagerFormUrl,
+      pa_NT,
+      staffDep,
+    );
+    try {
+      const result = sendEmail(
+        staffEmail,
+        "敬邀參與意見調查，以提升工作環境與管理效能(助理滿意度)",
+        emailContent,
+      );
+      // 5. 確認郵件是否成功發送
+      if (result && result.success) {
+        data[i][24] = "self_sent"; //更新寄送後狀態(Y欄)
+        Logger.log(`
+成功寄信給 ${employeeId}:${userNT_id}。層級${staffLevel}/職級${staffGrade}。狀態變更為:${
+          data[i][24]
+        }。
+自評表單：${selfManagerFormUrl || "無"}。
+處別: ${staffDep} / 處助理: ${pa_NT}。
+助理名單：${paManagerFormUrl || "無"}。
+        `);
+      } else {
+        Logger.log(`無法成功寄信 ${employeeId}:${userNT_id}:${staffEmail}`);
+        data[i][24] = self_status; // 捕捉到錯誤時，不更新狀態
+      }
+      // ✅ 加入發送延遲，避免觸發 AWS SES 速率限制
+      // 每封郵件間隔 100ms，相當於每秒最多發送 10 封
+      if (i < data.length - 1) {
+        Utilities.sleep(100);
+      }
+    } catch (error) {
+      Logger.log(
+        `發送失敗：${employeeId}:${userNT_id} Error: ${error.message}`,
+      );
+    }
+  }
 
-//   }
-
-//   // 5. 回寫狀態
-//   dataRange.setValues(data);
-// }
+  // 5. 回寫狀態
+  dataRange.setValues(data);
+}
 
 /**--------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- */
 /**XXXXXXXXXXXXXXXXXXX 不需要! 寄信(B-2): manager 上對下 部評課XXXXXXXXXXXXXXXXXXXXXXX*/
